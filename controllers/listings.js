@@ -101,6 +101,7 @@ module.exports.createListing = async (req, res, next) => {
       owner: req.user ? req.user._id : null,
     });
 
+
     if (req.file) {
       newListing.image = {
         url: req.file.path,
@@ -136,13 +137,12 @@ module.exports.createListing = async (req, res, next) => {
       newListing.latitude = coords.latitude;
       newListing.longitude = coords.longitude;
     } else {
-      // keep coordinates unset so the UI will show the 'No location set' message
+      // Geocoding failed silently — map won't show but listing saves successfully
       console.warn("⚠️ Geocoding returned no coordinates for:", { location, country });
-      // Inform the user so they know the map won't appear
-      req.flash("error", "Could not determine coordinates for the provided location — map may not be available for this listing.");
     }
 
     await newListing.save();
+
     req.flash("success", "New listing created!");
     res.redirect("/listings");
   } catch (err) {
@@ -165,15 +165,7 @@ module.exports.renderEditForm = async (req, res, next) => {
       req.flash("error", "Listing not found");
       return res.redirect("/listings");
     }
-    // Authorization: only owner or site owner can edit
-    const userId = req.user ? req.user._id : null;
-    const userRole = req.user ? (req.user.role || 'user') : 'user';
-    const isOwner = userId && listing.owner && listing.owner.equals(userId);
-    const isPrivileged = userRole === 'owner' || userRole === 'admin';
-    if (!isOwner && !isPrivileged) {
-      req.flash('error', 'You do not have permission to edit this listing.');
-      return res.redirect(`/listings/${id}`);
-    }
+    // Public edit enabled — allow anyone to open the edit form
     res.render("listings/edit", { title: "Edit Listing", listing });
   } catch (err) {
     next(err);
@@ -205,15 +197,7 @@ module.exports.updateListing = async (req, res, next) => {
       return res.redirect("/listings");
     }
 
-    // Authorization: only owner or site owner can update
-    const userId = req.user ? req.user._id : null;
-    const userRole = req.user ? (req.user.role || 'user') : 'user';
-    const isOwner = userId && listing.owner && listing.owner.equals(userId);
-    const isPrivileged = userRole === 'owner' || userRole === 'admin';
-    if (!isOwner && !isPrivileged) {
-      req.flash('error', 'You do not have permission to update this listing.');
-      return res.redirect(`/listings/${id}`);
-    }
+    // Public update enabled — allow anyone to submit changes
 
     // Only overwrite fields that were actually provided in the update payload.
     if (typeof title !== 'undefined') listing.title = title;
@@ -253,8 +237,8 @@ module.exports.updateListing = async (req, res, next) => {
       listing.latitude = coords.latitude;
       listing.longitude = coords.longitude;
     } else {
+      // Geocoding failed silently — map won't show but listing updates successfully
       console.warn("⚠️ Re-Geocoding returned no coordinates for:", { location, country });
-      req.flash("error", "Could not determine coordinates for the provided location — map may not be available for this listing.");
     }
 
     await listing.save();
@@ -297,18 +281,14 @@ module.exports.showListing = async (req, res, next) => {
       avgRating = sum / totalReviews;
     }
 
-    const userId = req.user ? req.user._id : null;
-    const userRole = req.user ? (req.user.role || 'user') : 'user';
-    const isOwner = userId && listing.owner && listing.owner.equals(userId);
-    const isPrivileged = userRole === 'owner' || userRole === 'admin';
-
+    // Show edit/delete controls to everyone (public edit enabled)
     res.render("listings/show", {
       title: listing.title,
       listing,
       avgRating,
       ratingCounts,
       totalReviews,
-      canEdit: !!(isOwner || isPrivileged),
+      canEdit: true,
     });
   } catch (err) {
     next(err);
@@ -364,14 +344,7 @@ module.exports.deleteListing = async (req, res, next) => {
     }
 
     // Authorization: only owner or site owner can delete
-    const userId = req.user ? req.user._id : null;
-    const userRole = req.user ? (req.user.role || 'user') : 'user';
-    const isOwner = userId && listing.owner && listing.owner.equals(userId);
-    const isPrivileged = userRole === 'owner' || userRole === 'admin';
-    if (!isOwner && !isPrivileged) {
-      req.flash('error', 'You do not have permission to delete this listing.');
-      return res.redirect(`/listings/${id}`);
-    }
+    // Public delete enabled — allow anyone to delete this listing
 
     if (
       listing.image &&

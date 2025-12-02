@@ -110,6 +110,17 @@ const sampleListings = [
     price: 1699,
     location: "Darjeeling",
     country: "India"
+  },
+  {
+    title: "Darjeeling Hill-Top Cottage",
+    description: "Scenic views of tea gardens and cool mountain breeze.",
+    image: {
+      url: "https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=800&q=60",
+      filename: "darjeeling-hill"
+    },
+    price: 1699,
+    location: "Darjeeling",
+    country: "India"
   }
 ];
 

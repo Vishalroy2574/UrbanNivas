@@ -1,16 +1,23 @@
 // init/index.js
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config();
+}
+
 const mongoose = require("mongoose");
-const initData = require("./data");  
+const initData = require("./data");
 const Listing = require("../models/listing.js");
 
-const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
+// Use Atlas if ATLASDB_URL is set, otherwise local UrbanNivas
+const dbUrl =
+  process.env.ATLASDB_URL || "mongodb://127.0.0.1:27017/UrbanNivas";
 
 async function main() {
   try {
-    await mongoose.connect(MONGO_URL);
+    await mongoose.connect(dbUrl);
     console.log("✅ Connected to MongoDB");
   } catch (err) {
     console.error("❌ MongoDB connection error:", err);
+    process.exit(1);
   }
 }
 

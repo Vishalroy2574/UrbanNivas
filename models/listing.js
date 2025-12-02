@@ -33,6 +33,8 @@ const listingSchema = new Schema(
       ref: "User",
     },
 
+    // owner / user who created this listing
+
     reviews: [
       {
         type: Schema.Types.ObjectId,

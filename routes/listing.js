@@ -45,30 +45,14 @@ router.post(
   listings.createListing
 );
 
-// edit form – only listing owner or site owner
-router.get(
-  "/:id/edit",
-  isLoggedIn,
-  isListingOwnerOrSiteOwner,
-  listings.renderEditForm
-);
+// edit form – public (anyone can open)
+router.get("/:id/edit", listings.renderEditForm);
 
-// update listing
-router.put(
-  "/:id",
-  isLoggedIn,
-  isListingOwnerOrSiteOwner,
-  upload.single("image"),
-  listings.updateListing
-);
+// update listing – public (anyone can update)
+router.put("/:id", upload.single("image"), listings.updateListing);
 
-// delete listing
-router.delete(
-  "/:id",
-  isLoggedIn,
-  isListingOwnerOrSiteOwner,
-  listings.deleteListing
-);
+// delete listing – public (anyone can delete)
+router.delete("/:id", listings.deleteListing);
 
 // delete review
 router.delete(

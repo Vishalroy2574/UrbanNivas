@@ -20,12 +20,16 @@ const bookingsRouter = require("./routes/bookings");
 
 const User = require("./models/user.js");
 
-const PORT = 8080;
-const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
+// ---------- CONFIG ----------
+const PORT = process.env.PORT || 8080;
+
+// Use Atlas in production, fallback to local in dev if env not set
+const dbUrl =
+  process.env.ATLASDB_URL || "mongodb://127.0.0.1:27017/UrbanNivas";
 
 // ----- DB CONNECTION -----
 mongoose
-  .connect(MONGO_URL)
+  .connect(dbUrl)
   .then(() => console.log("✅ Connected to MongoDB"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
@@ -41,7 +45,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // ----- SESSION + FLASH -----
 const sessionOptions = {
-  secret: "mysupersecret",
+  secret: process.env.SESSION_SECRET || "mysupersecret",
   resave: false,
   saveUninitialized: true,
   cookie: {
@@ -58,7 +62,6 @@ app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 
-// use helper from passport-local-mongoose
 passport.use(User.createStrategy());
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
@@ -71,7 +74,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// ----- DEMO USER (optional) -----
+// ----- DEMO USER -----
 app.get("/demouser", async (req, res, next) => {
   try {
     let user = await User.findOne({ username: "student123" });
@@ -96,10 +99,10 @@ app.get("/demouser", async (req, res, next) => {
 });
 
 // ----- ROUTES -----
-app.use("/listings", listingsRouter);   // /listings/...
-app.use("/", userRouter);               // /login, /signup, etc.
-app.use("/admin", adminRouter);         // /admin/...
-app.use("/", bookingsRouter);           // /listings/:id/book , /bookings/mine, etc.
+app.use("/listings", listingsRouter);
+app.use("/", userRouter);
+app.use("/admin", adminRouter);
+app.use("/", bookingsRouter);
 
 // Root redirect
 app.get("/", (req, res) => {
@@ -114,5 +117,5 @@ app.use((err, req, res, next) => {
 
 // ----- SERVER START -----
 app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
