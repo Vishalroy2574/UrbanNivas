@@ -1,0 +1,320 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="row">
+  <div class="col-md-8 mx-auto">
+
+    <!-- Listing Card -->
+    <div class="card mb-4 shadow-sm">
+      <% 
+        let imageSrc;
+        if (listing.image && listing.image.url) {
+          imageSrc = listing.image.url;
+        } else if (typeof listing.image === "string" && listing.image.length) {
+          imageSrc = listing.image;
+        } else {
+          imageSrc = "https://via.placeholder.com/800x400?text=No+Image";
+        }
+      %>
+
+      <img src="<%= imageSrc %>" class="card-img-top" alt="<%= listing.title %>">
+
+      <div class="card-body">
+        <% if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'owner')) { %>
+          <div class="mb-3">
+            <div class="alert alert-info py-2 mb-0">
+              <strong>Note:</strong> You have elevated privileges (<%= currentUser.role %>). You can edit or delete listings and moderate reviews.
+            </div>
+          </div>
+          <div class="mb-3">
+            <a href="/listings/<%= listing._id %>/bookings" class="btn btn-outline-secondary btn-sm">View bookings for this listing</a>
+          </div>
+        <% } %>
+        <h2 class="card-title mb-3"><%= listing.title %></h2>
+        <!-- Listing textual location: visible when user opens details -->
+        <p class="text-muted mb-1">
+          <i class="bi bi-geo-alt"></i>
+          <%= listing.location %><% if (listing.country) { %>, <%= listing.country %><% } %>
+        </p>
+        <p class="fw-bold fs-5 mb-2">₹<%= listing.price %></p>
+        <p class="card-text"><%= listing.description %></p>
+        <div class="mb-3">
+          <% if (!currentUser) { %>
+            <p class="text-muted">You must <a href="/login">log in</a> to book this listing.</p>
+          <% } else if (listing.owner && currentUser._id && (listing.owner.equals ? listing.owner.equals(currentUser._id) : listing.owner.toString() === currentUser._id.toString())) { %>
+            <p class="text-muted">You are the owner of this listing — you cannot book your own listing.</p>
+          <% } else { %>
+            <!-- Booking form -->
+            <form action="/listings/<%= listing._id %>/book" method="POST" class="row g-2 align-items-end">
+              <div class="col-sm-4">
+                <label class="form-label small mb-0">Check-in</label>
+                <input type="date" name="startDate" class="form-control form-control-sm" required />
+              </div>
+              <div class="col-sm-4">
+                <label class="form-label small mb-0">Check-out</label>
+                <input type="date" name="endDate" class="form-control form-control-sm" required />
+              </div>
+              <div class="col-sm-2">
+                <label class="form-label small mb-0">Guests</label>
+                <input type="number" name="guests" class="form-control form-control-sm" min="1" value="1" />
+              </div>
+              <div class="col-sm-2">
+                <button class="btn btn-accent btn-sm w-100">Book</button>
+              </div>
+            </form>
+          <% } %>
+        </div>
+        <% if (typeof canEdit !== 'undefined' && canEdit) { %>
+          <div class="d-flex gap-2 mt-3">
+            <a href="/listings/<%= listing._id %>/edit" class="btn btn-outline-primary btn-sm">
+              Edit Listing
+            </a>
+
+            <form
+              action="/listings/<%= listing._id %>?_method=DELETE"
+              method="POST"
+              class="d-inline"
+            >
+              <button class="btn btn-outline-danger btn-sm" onclick="return confirm('Delete this listing?')">
+                Delete Listing
+              </button>
+            </form>
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- 🗺️ MAP UNDER LISTING -->
+    <style>
+      .map-container {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+      }
+      #map {
+        width: 100%;
+        height: min(45vh, 400px); /* responsive map height */
+      }
+
+      @media (max-width: 576px) {
+        #map { height: 220px; }
+      }
+    </style>
+
+    <div class="map-container">
+      <div
+        id="map"
+        data-lat="<%= listing.latitude %>"
+        data-lng="<%= listing.longitude %>"
+        data-title="<%- listing.title %>"
+      ></div>
+    </div>
+
+    <!-- Reviews -->
+    <hr>
+    <h3 class="mb-3">Reviews</h3>
+
+    <% if (totalReviews === 0) { %>
+      <p class="text-muted">No reviews yet. Be the first to review this place.</p>
+    <% } else { %>
+
+      <!-- Rating summary -->
+      <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+          <div class="d-flex flex-column align-items-start">
+            <h1 class="display-5 mb-0">
+              <%= avgRating.toFixed(1) %>
+            </h1>
+            <p class="mb-1 text-muted">
+              <% const rounded = Math.round(avgRating); %>
+              <span>
+                <%= "★".repeat(rounded) %><%= "☆".repeat(5 - rounded) %>
+              </span>
+              <span class="ms-2"><%= totalReviews %> review<%= totalReviews > 1 ? "s" : "" %></span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Distribution -->
+        <div class="col-md-8 mb-3">
+          <% for (let s = 5; s >= 1; s--) {
+               const count = ratingCounts[s - 1];
+               const percent = totalReviews ? (count / totalReviews) * 100 : 0;
+          %>
+            <div class="d-flex align-items-center mb-1">
+              <div style="width: 40px;">
+                <strong><%= s %></strong> <span style="font-size: 0.9rem;">★</span>
+              </div>
+              <div class="flex-grow-1 mx-2">
+                <div class="progress" style="height: 6px;">
+                    <div
+                      class="progress-bar"
+                      role="progressbar"
+                      style="width: <%= percent + '%' %>;"
+                  ></div>
+                </div>
+              </div>
+              <div style="width: 40px; text-align: right; font-size: 0.85rem;">
+                <%= count %>
+              </div>
+            </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Individual reviews -->
+      <ul class="list-group mb-4">
+        <% listing.reviews.forEach(review => { %>
+          <li class="list-group-item">
+
+            <div class="d-flex justify-content-between">
+              <div>
+                <strong>
+                  <%= review.author ? review.author.username : "Anonymous" %>
+                </strong>
+                <span class="text-muted" style="font-size: 0.8rem;">
+                  •
+                  <%= new Date(review.createdAt).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })
+                  %>
+                </span>
+              </div>
+
+              <div>
+                <strong>
+                  <%= "★".repeat(review.rating) %><%= "☆".repeat(5 - review.rating) %>
+                </strong>
+              </div>
+            </div>
+            <p class="mb-0 mt-2"><%= review.body %></p>
+
+            <% // show delete button only for the review author (UI) %>
+            <% const loggedId = currentUser ? (currentUser._id && currentUser._id.toString ? currentUser._id.toString() : currentUser._id) : null; %>
+            <% const reviewAuthorId = review.author && (review.author._id ? (review.author._id.toString ? review.author._id.toString() : review.author._id) : (review.author.toString ? review.author.toString() : null)); %>
+            <% const listingOwnerId = listing.owner && (listing.owner._id ? (listing.owner._id.toString ? listing.owner._id.toString() : listing.owner._id) : (listing.owner.toString ? listing.owner.toString() : null)); %>
+            <% const isListingOwner = !!(loggedId && listingOwnerId && (loggedId === listingOwnerId)); %>
+            <% const isPrivilegedUser = currentUser && (currentUser.role === 'owner' || currentUser.role === 'admin'); %>
+            <% const isReviewAuthor = !!(loggedId && reviewAuthorId && (loggedId === reviewAuthorId)); %>
+
+            <% if (isReviewAuthor || isListingOwner || isPrivilegedUser) { %>
+              <div class="mt-2">
+                <form action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST" class="d-inline">
+                  <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete your review?')">Delete</button>
+                </form>
+              </div>
+            <% } %>
+
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+
+    <!-- Add Review -->
+    <h4 class="mb-3">Add a Review</h4>
+
+    <form action="/listings/<%= listing._id %>/reviews" method="POST">
+      <div class="mb-3">
+        <label class="form-label">Comment</label>
+        <textarea name="review[body]" class="form-control" rows="3" required></textarea>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Rating (1–5)</label>
+        <input
+          type="number"
+          name="review[rating]"
+          min="1"
+          max="5"
+          class="form-control"
+          required
+        >
+      </div>
+      <button class="btn btn-primary">Submit Review</button>
+    </form>
+
+  </div>
+</div>
+
+<!-- Leaflet CSS + JS -->
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet/dist/leaflet.css"
+/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const el = document.getElementById("map");
+    const lat = parseFloat(el.dataset.lat);
+    const lng = parseFloat(el.dataset.lng);
+    const title = el.dataset.title;
+
+    // Prefer showing both listing and viewer's location.
+    (async function () {
+      const listingLat = Number(el.dataset.lat);
+      const listingLng = Number(el.dataset.lng);
+
+      // helper to add tile layer
+      function addTiles(map) {
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+        }).addTo(map);
+      }
+
+      // Case A: we have listing coords
+      if (!isNaN(listingLat) && !isNaN(listingLng)) {
+        const listingPoint = [listingLat, listingLng];
+        const map = L.map(el).setView(listingPoint, 13);
+        addTiles(map);
+
+        const listingMarker = L.marker(listingPoint).addTo(map).bindPopup(title || 'Listing');
+
+        // try to show visitor location as well
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              const userPoint = [pos.coords.latitude, pos.coords.longitude];
+              // show user location with a circle marker
+              L.circleMarker(userPoint, { radius: 8, color: '#28a745', fillOpacity: 0.9 })
+                .addTo(map)
+                .bindPopup('Your location');
+
+              // fit bounds to include both listing and user
+              const bounds = L.latLngBounds([listingPoint, userPoint]);
+              map.fitBounds(bounds, { padding: [50, 50] });
+            },
+            (err) => {
+              console.warn('Geolocation failed or permission denied', err && err.message);
+            },
+            { enableHighAccuracy: true, timeout: 5000 }
+          );
+        }
+
+        return;
+      }
+
+      // Case B: No listing coords — center on user if available
+      const map = L.map(el).setView([0, 0], 2);
+      addTiles(map);
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const userPoint = [pos.coords.latitude, pos.coords.longitude];
+            map.setView(userPoint, 13);
+            L.marker(userPoint).addTo(map).bindPopup('Your location');
+          },
+          (err) => {
+            console.warn('Geolocation failed or permission denied', err && err.message);
+            el.innerHTML = '<div style="padding:0.75rem;color:#666">No coordinates available for this listing and permission to access your location was denied.</div>';
+          },
+          { enableHighAccuracy: true, timeout: 5000 }
+        );
+      } else {
+        el.innerHTML = '<div style="padding:0.75rem;color:#666">No coordinates available for this listing and your browser does not support geolocation.</div>';
+      }
+    })();
+  });
+</script>

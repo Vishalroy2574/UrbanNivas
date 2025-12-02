@@ -1,0 +1,45 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="container py-4">
+  <h1 class="mb-4">User management</h1>
+
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <table class="table mb-0 align-middle">
+        <thead>
+          <tr>
+            <th scope="col">User</th>
+            <th scope="col">Email</th>
+            <th scope="col">Role</th>
+            <th scope="col" style="width:220px">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% users.forEach(u => { %>
+            <tr>
+              <td class="d-flex align-items-center gap-3">
+                <img src="<%= u.avatar || '/uploads/userProfile.png.avif' %>" width="42" height="42" style="object-fit:cover;border-radius:8px;"/>
+                <div>
+                  <div><strong><%= u.username %></strong></div>
+                  <div class="text-muted small"><%= u._id %></div>
+                </div>
+              </td>
+              <td><%= u.email %></td>
+              <td><%= u.role %></td>
+              <td>
+                <form action="/admin/users/<%= u._id %>/role" method="POST" class="d-flex gap-2 align-items-center">
+                  <select name="role" class="form-select form-select-sm w-auto">
+                    <option value="user" <%= u.role === 'user' ? 'selected' : '' %>>user</option>
+                    <option value="owner" <%= u.role === 'owner' ? 'selected' : '' %>>owner</option>
+                    <option value="admin" <%= u.role === 'admin' ? 'selected' : '' %>>admin</option>
+                  </select>
+                  <button class="btn btn-sm btn-primary" type="submit">Save</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

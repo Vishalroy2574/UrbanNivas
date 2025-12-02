@@ -1,0 +1,30 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="container py-4">
+  <h1 class="mb-4">Bookings for listing</h1>
+
+  <% if (!bookings || bookings.length === 0) { %>
+    <p class="text-muted">No bookings for this listing.</p>
+  <% } else { %>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Dates</th>
+          <th>Guests</th>
+          <th>Booked At</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% bookings.forEach(b => { %>
+          <tr>
+            <td><%= b.user ? b.user.username : (b.user ? b.user.email : 'User') %></td>
+            <td><%= new Date(b.startDate).toLocaleDateString() %> — <%= new Date(b.endDate).toLocaleDateString() %></td>
+            <td><%= b.guests %></td>
+            <td><%= new Date(b.createdAt).toLocaleString() %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</div>

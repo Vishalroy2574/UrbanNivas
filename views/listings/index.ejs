@@ -1,0 +1,131 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="container py-4">
+
+  <% if (q) { %>
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <div>
+        <h2 class="mb-0">Search results for "<%= q %>"</h2>
+        <small class="text-muted">
+          <%= allListings.length %> result<%= allListings.length !== 1 ? 's' : '' %>
+        </small>
+      </div>
+      <div>
+        <a href="/listings" class="btn btn-outline-secondary btn-sm">Clear search</a>
+      </div>
+    </div>
+  <% } else { %>
+    <!-- <h1 class="mb-4">All Listings</h1> -->
+  <% } %>
+
+  <style>
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    .listing-card {
+      border: none;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      background-color: #fff;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .listing-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+    }
+
+    .listing-image {
+      width: 100%;
+      height: 260px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .listing-body {
+      padding: 14px 18px 18px;
+    }
+
+    .listing-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .listing-location {
+      font-size: 0.9rem;
+      color: #6c757d;
+      margin-bottom: 6px;
+    }
+
+    .listing-price {
+      font-weight: 600;
+      font-size: 0.98rem;
+    }
+
+    .listing-price span {
+      font-weight: 400;
+      color: #555;
+    }
+
+    .listing-link {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .listing-actions {
+      border-top: 1px solid rgba(0,0,0,0.04);
+      background: #fff;
+    }
+  </style>
+
+  <div class="card-grid">
+    <% allListings.forEach(listing => { %>
+      <article class="listing-card">
+        <a href="/listings/<%= listing._id %>" class="listing-link">
+          <!-- BIG IMAGE -->
+          <img
+            class="listing-image"
+            alt="<%= listing.title %>"
+            src="<%= (listing.image && listing.image.url)
+                  || listing.image
+                  || 'https://picsum.photos/400/250?blur=2' %>"
+          >
+
+          <!-- TEXT SECTION -->
+          <div class="listing-body">
+            <h5 class="listing-title"><%= listing.title %></h5>
+
+            <p class="listing-location mb-1">
+              <%= listing.location %><% if (listing.country) { %>, <%= listing.country %><% } %>
+            </p>
+
+            <p class="listing-price mb-0">
+              ₹<%= listing.price %>
+              <span>/night</span>
+            </p>
+          </div>
+        </a>
+
+        <!-- inline actions (edit/delete) - visible only to owner or site owner -->
+        <% const userId = currentUser ? (currentUser._id && currentUser._id.toString ? currentUser._id.toString() : currentUser._id) : null; %>
+        <% const isOwner = userId && listing.owner && ((listing.owner._id && listing.owner._id.toString && listing.owner._id.toString() === userId) || (listing.owner.toString && listing.owner.toString() === userId)); %>
+        <% const isSiteOwner = currentUser && (currentUser.role === 'owner' || currentUser.role === 'admin'); %>
+        <% const canEdit = !!(isOwner || isSiteOwner); %>
+
+        <% if (canEdit) { %>
+          <div class="listing-actions p-2 d-flex justify-content-end gap-2">
+            <a href="/listings/<%= listing._id %>/edit" class="btn btn-outline-primary btn-sm">Edit</a>
+            <form action="/listings/<%= listing._id %>?_method=DELETE" method="POST" class="m-0">
+              <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Delete this listing?')">Delete</button>
+            </form>
+          </div>
+        <% } %>
+      </article>
+    <% }) %>
+  </div>
+</div>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title || "WanderLust" %></title>
+
+  <!-- Bootstrap CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Bootstrap Icons (optional) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/css/style.css" />
+
+  <style>
+    html, body {
+      height: 100%;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+    footer {
+      margin-top: auto;
+    }
+
+    /* Center search styling moved to public/css/style.css */
+
+    @media (max-width: 768px) {
+      .nav-search-wrapper {
+        position: static !important;
+        transform: none !important;
+        margin: 0.5rem auto !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom sticky-top">
+    <div class="container-fluid position-relative">
+
+      <!-- LEFT SIDE LINKS -->
+      <div class="d-flex">
+        <ul class="navbar-nav flex-row">
+          
+          <li class="nav-item me-3">
+            <a class="nav-link d-flex align-items-center brand-link" href="/">
+              <span class="brand-icon me-2">
+                <img src="/uploads/airbnb-icon.jpeg" alt="logo" class="brand-image" />
+              </span>
+              <span class="brand-text">Wanderlust</span>
+            </a>
+          </li>
+
+          <!-- <li class="nav-item me-3">
+            <a class="nav-link" href="/listings">Explore</a>
+          </li> -->
+
+          <% if (currentUser && currentUser.role === 'admin') { %>
+            <li class="nav-item me-3">
+              <a class="nav-link" href="/admin/users">Admin</a>
+            </li>
+          <% } %>
+
+          <!-- <li class="nav-item">
+            <a class="nav-link" href="/listings/new">Add New Listing</a>
+          </li> -->
+
+        </ul>
+      </div>
+
+      <!-- ONLY ONE SEARCH BAR - CENTER -->
+          <div class="nav-search-wrapper d-flex position-absolute top-50 start-50 translate-middle">
+        <form role="search" class="d-flex align-items-center nav-search-center" action="/listings" method="GET">
+          <input
+            class="form-control me-2"
+            type="search"
+            name="q"
+            placeholder="Search destination"
+            aria-label="Search"
+            value="<%= typeof q !== 'undefined' ? q : '' %>"
+          >
+          <button class="btn btn-accent px-3" type="submit" aria-label="Search listings">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+        </form>
+      </div>
+
+      <!-- RIGHT SIDE SECTION -->
+      <div class="d-flex ms-auto align-items-center">
+
+        <% if (!currentUser) { %>
+          <a class="nav-link me-2" href="/login">Log in</a>
+          <a class="btn btn-outline-dark rounded-pill px-3" href="/signup">Sign up</a>
+
+        <% } else { %>
+          <div class="dropdown">
+            <button
+              class="btn btn-light border rounded-pill d-flex align-items-center px-3 py-1"
+              type="button"
+              id="userMenu"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <span class="me-2">Menu</span>
+              <div class="rounded-circle bg-secondary d-flex justify-content-center align-items-center"
+                style="width: 32px; height: 32px; color: white; font-weight: bold;">
+                <%= (currentUser.username || currentUser.email || "?")[0].toUpperCase() %>
+              </div>
+              <% if (currentUser && currentUser.role === 'admin') { %>
+                <span class="badge bg-danger ms-2">Admin</span>
+              <% } else if (currentUser && currentUser.role === 'owner') { %>
+                <span class="badge bg-warning text-dark ms-2">Owner</span>
+              <% } %>
+            </button>
+
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+              <li class="dropdown-item-text text-muted">
+                Signed in as <strong><%= currentUser.username || currentUser.email %></strong>
+              </li>
+              <li><hr class="dropdown-divider" /></li>
+              <li><a class="dropdown-item" href="/users/<%= currentUser._id %>">Profile</a></li>
+              <li><a class="dropdown-item" href="/bookings/mine">My bookings</a></li>
+              <li><a class="dropdown-item" href="/listings/new">Host your home</a></li>
+              <li><hr class="dropdown-divider" /></li>
+              <li>
+                <form action="/logout" method="POST" class="m-0">
+                  <button class="dropdown-item text-danger" type="submit">Log out</button>
+                </form>
+              </li>
+            </ul>
+          </div>
+
+        <% } %>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="container mt-4">
+    <%- include('../includes/flash') %>
+    <%- body %>
+  </main>
+
+              <hr>
+
+  <!-- FOOTER -->
+  <footer class="text-center py-4" style="background-color: #f7f7f7;">
+    <div class="container">
+      <div class="mb-3">
+        <a href="https://www.instagram.com/__vishal_roy_74__/?hl=en" class="mx-2 text-dark"><i class="fa-brands fa-instagram fa-lg"></i></a>
+        <a href="https://www.linkedin.com/in/vishal-roy-82a692269/" class="mx-2 text-dark"><i class="fa-brands fa-linkedin fa-lg"></i></a>
+        <a href="https://github.com/Vishalroy2574" class="mx-2 text-dark"><i class="fa-brands fa-github fa-lg"></i></a>
+      </div>
+
+      <p class="mb-1">© WanderLust Private Limited</p>
+      <p class="mb-0">
+        <a href="#" class="text-decoration-none mx-2 text-dark">Privacy</a>
+        <a href="#" class="text-decoration-none mx-2 text-dark">Terms</a>
+      </p>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

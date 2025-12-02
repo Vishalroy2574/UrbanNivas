@@ -1,0 +1,79 @@
+<% layout('layouts/boilerplate') %>
+
+<h1 class="mb-4">Edit Listing</h1>
+
+<form action="/listings/<%= listing._id %>?_method=PUT" method="POST" enctype="multipart/form-data">
+  <div class="mb-3">
+    <label class="form-label">Title</label>
+    <input
+      type="text"
+      name="listing[title]"
+      class="form-control"
+      value="<%= listing.title %>"
+      required
+    >
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Description</label>
+    <textarea
+      name="listing[description]"
+      class="form-control"
+      rows="3"
+      required
+    ><%= listing.description %></textarea>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Price (₹)</label>
+    <input
+      type="number"
+      name="listing[price]"
+      class="form-control"
+      min="0"
+      step="any"
+      value="<%= listing.price %>"
+      required
+    >
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Location</label>
+    <input
+      type="text"
+      name="listing[location]"
+      class="form-control"
+      value="<%= listing.location %>"
+      required
+    >
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Country</label>
+    <input
+      type="text"
+      name="listing[country]"
+      class="form-control"
+      value="<%= listing.country %>"
+      required
+    >
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Image (upload new to replace)</label>
+    <input
+      type="file"
+      name="image"
+      class="form-control mb-2"
+    >
+    <% if (listing.image && listing.image.url) { %>
+      <small class="text-muted">
+        Current image:
+        <a href="<%= listing.image.url %>" target="_blank">view</a>
+      </small>
+    <% } %>
+  </div>
+
+  <button class="btn btn-success">Save Changes</button>
+  <a href="/listings/<%= listing._id %>" class="btn btn-secondary ms-2">Cancel</a>
+</form>

@@ -1,0 +1,25 @@
+✅ 2. Professional & Formal Introduction
+
+Good morning. Thank you for giving me this opportunity.
+My name is Vishal Kumar, and I belong to Begusarai. I completed my schooling from SMS and am currently pursuing my B.Tech in Information Technology from NIET.
+
+Throughout my academic journey, I have gained strong interest and hands-on experience in frontend and Java backend development. I have developed several projects, including a Netflix clone, a real-time chat application built with React and Firebase, and a weather forecasting application.
+
+I am proficient in technologies such as HTML, CSS, JavaScript, React, and MySQL.
+Outside academics, I enjoy playing chess and cricket.
+
+My key strength is my consistency and structured problem-solving approach. I focus on understanding problems deeply and finding logical solutions.
+One area I have been improving is public speaking; regular participation in presentations and mock interviews has helped me gain confidence.
+
+✅ 3. Interview-Ready Spoken Introduction
+
+(Perfect for HR or technical round)
+
+Good morning, and thank you for this opportunity.
+My name is Vishal Kumar, and I’m from Begusarai. I’m currently pursuing my B.Tech in IT from NIET.
+
+I have a strong interest in frontend and Java backend development. I’ve worked on projects like a Netflix clone, a real-time chat app using React and Firebase, and a weather app.
+I’m comfortable with HTML, CSS, JavaScript, React, and MySQL.
+
+Apart from my technical interests, I enjoy playing chess and cricket.
+My biggest strength is consistency and a good problem-solving approach. One area I’ve been improving is public speaking, and I’ve seen clear progress through presentations and mock interviews.

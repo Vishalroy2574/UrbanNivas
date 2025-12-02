@@ -1,0 +1,93 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="container py-4">
+  <div class="row">
+    <div class="col-md-8 mx-auto">
+      <div class="d-flex align-items-center gap-3 mb-3">
+        <img src="<%= profileUser.avatar || '/uploads/userProfile.png.avif' %>" width="80" height="80" style="object-fit:cover;border-radius:12px;"/>
+        <div>
+          <h2 class="mb-0"><%= profileUser.username %></h2>
+          <div class="text-muted small"><%= profileUser.email %></div>
+        </div>
+        <div class="ms-auto">
+          <span class="badge bg-secondary"><%= profileUser.role || 'user' %></span>
+        </div>
+      </div>
+
+      <% if (currentUser && currentUser.role === 'admin') { %>
+        <div class="card mb-3">
+          <div class="card-body">
+            <h5 class="card-title">Admin actions</h5>
+            <p class="small text-muted mb-2">Change this user's role. You cannot remove your own admin role from this page.</p>
+
+            <form action="/admin/users/<%= profileUser._id %>/role" method="POST" class="d-flex gap-2 align-items-center">
+              <select name="role" class="form-select w-auto form-select-sm" <%= (currentUser._id && currentUser._id.equals && currentUser._id.equals(profileUser._id)) ? 'disabled' : '' %>>
+                <option value="user" <%= profileUser.role === 'user' ? 'selected' : '' %>>user</option>
+                <option value="owner" <%= profileUser.role === 'owner' ? 'selected' : '' %>>owner</option>
+                <option value="admin" <%= profileUser.role === 'admin' ? 'selected' : '' %>>admin</option>
+              </select>
+              <button class="btn btn-sm btn-primary" type="submit" <%= (currentUser._id && currentUser._id.equals && currentUser._id.equals(profileUser._id)) ? 'disabled' : '' %>>Save</button>
+            </form>
+          </div>
+        </div>
+      <% } %>
+
+      <h4 class="mb-3">Listings by <%= profileUser.username %></h4>
+      <% if (!listings || listings.length === 0) { %>
+        <p class="text-muted">No listings yet.</p>
+      <% } else { %>
+        <div class="row row-cols-1 row-cols-md-2 g-3 mb-4">
+          <% listings.forEach(l => { %>
+            <div class="col">
+              <div class="card h-100">
+                <img src="<%= (l.image && l.image.url) || l.image || 'https://picsum.photos/400/250?blur=2' %>" class="card-img-top" alt="<%= l.title %>">
+                <div class="card-body">
+                  <h5 class="card-title mb-1"><%= l.title %></h5>
+                  <p class="text-muted mb-0"><%= l.location %> <% if (l.country) { %>, <%= l.country %><% } %></p>
+                </div>
+                <div class="card-footer bg-transparent">
+                  <a href="/listings/<%= l._id %>" class="btn btn-sm btn-outline-primary">View</a>
+                </div>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+
+      <h4 class="mb-3">Reviews by <%= profileUser.username %></h4>
+      <% if (!reviews || reviews.length === 0) { %>
+        <p class="text-muted">No reviews yet.</p>
+      <% } else { %>
+        <ul class="list-group">
+          <% reviews.forEach(r => { %>
+            <li class="list-group-item d-flex justify-content-between align-items-start">
+              <div>
+                <strong><%= r.listing ? r.listing.title : 'Listing' %></strong>
+                <div class="small text-muted"><%= r.body.substring(0, 140) %></div>
+              </div>
+              <div><a href="/listings/<%= r.listing ? r.listing._id : '#' %>" class="btn btn-sm btn-outline-secondary">Open</a></div>
+            </li>
+          <% }) %>
+        </ul>
+      <% } %>
+
+      <% if (bookings && bookings.length) { %>
+        <h4 class="mt-4 mb-3">Bookings by <%= profileUser.username %></h4>
+        <ul class="list-group mb-4">
+          <% bookings.forEach(b => { %>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <div>
+                <strong><%= b.listing ? b.listing.title : 'Listing' %></strong>
+                <div class="small text-muted">From <%= new Date(b.startDate).toLocaleDateString() %> to <%= new Date(b.endDate).toLocaleDateString() %> — <%= b.guests %> guest(s)</div>
+              </div>
+              <div>
+                <a href="/listings/<%= b.listing ? b.listing._id : '#' %>" class="btn btn-sm btn-outline-secondary">Open</a>
+              </div>
+            </li>
+          <% }) %>
+        </ul>
+      <% } %>
+
+    </div>
+  </div>
+</div>
