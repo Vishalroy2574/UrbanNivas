@@ -118,8 +118,8 @@
     <div class="map-container">
       <div
         id="map"
-        data-lat="<%= listing.latitude %>"
-        data-lng="<%= listing.longitude %>"
+        data-lat="<%= listing.latitude != null ? listing.latitude : '' %>"
+        data-lng="<%= listing.longitude != null ? listing.longitude : '' %>"
         data-title="<%- listing.title %>"
       ></div>
     </div>
@@ -164,9 +164,8 @@
                     <div
                       class="progress-bar"
                       role="progressbar"
-                    style="width: <%= percent %>%;"
-
-                  ></div>
+                      style="width: <%= percent %>%;"
+                    ></div>
                 </div>
               </div>
               <div style="width: 40px; text-align: right; font-size: 0.85rem;">
@@ -262,14 +261,14 @@
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     const el = document.getElementById("map");
-    const lat = parseFloat(el.dataset.lat);
-    const lng = parseFloat(el.dataset.lng);
+    const latStr = el.dataset.lat;
+    const lngStr = el.dataset.lng;
     const title = el.dataset.title;
 
     // Prefer showing both listing and viewer's location.
     (async function () {
-      const listingLat = Number(el.dataset.lat);
-      const listingLng = Number(el.dataset.lng);
+      const listingLat = latStr && latStr !== '' && latStr !== 'null' ? Number(latStr) : NaN;
+      const listingLng = lngStr && lngStr !== '' && lngStr !== 'null' ? Number(lngStr) : NaN;
 
       // helper to add tile layer
       function addTiles(map) {

@@ -90,7 +90,7 @@ module.exports.createListing = async (req, res, next) => {
       }
     }
 
-    const { title, description, price, location, country } = bodyListing;
+    const { title, description, price, location, country, latitude, longitude } = bodyListing;
 
     const newListing = new Listing({
       title,
@@ -100,6 +100,18 @@ module.exports.createListing = async (req, res, next) => {
       country,
       owner: req.user ? req.user._id : null,
     });
+
+    // Use manual coordinates if provided
+    if (latitude && longitude && 
+        !isNaN(parseFloat(latitude)) && !isNaN(parseFloat(longitude))) {
+      const lat = parseFloat(latitude);
+      const lng = parseFloat(longitude);
+      if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+      newListing.latitude = lat;
+      newListing.longitude = lng;
+      console.log("📍 Using coordinates from map:", { latitude: lat, longitude: lng });
+      }
+    }
 
 
     if (req.file) {
@@ -114,31 +126,50 @@ module.exports.createListing = async (req, res, next) => {
       };
     }
 
-    // Attempt geocoding, with fallbacks. Save coords if any attempt succeeds.
-    console.log("🔍 Geocoding attempt for:", { location, country });
-    let coords = null;
+    // Attempt geocoding only if manual coordinates weren't provided
+    if (!newListing.latitude || !newListing.longitude) {
+      console.log("🔍 Geocoding attempt for:", { location, country });
+      let coords = null;
 
-    // try full query (location + country)
-    coords = await geocodeLocation(location, country);
-    if (!coords && location) {
-      // try location only
-      console.log("🔁 Geocoding fallback: trying location only");
-      coords = await geocodeLocation(location);
-    }
-    if (!coords && country) {
-      // last-resort try: country only
-      console.log("🔁 Geocoding fallback: trying country only");
-      coords = await geocodeLocation(country);
-    }
+      // try full query (location + country)
+      try {
+        coords = await geocodeLocation(location, country);
+      } catch (err) {
+        console.warn("Geocoding error (full query):", err.message);
+      }
+      
+      if (!coords && location) {
+        // try location only
+        console.log("🔁 Geocoding fallback: trying location only");
+        try {
+          coords = await geocodeLocation(location);
+        } catch (err) {
+          console.warn("Geocoding error (location only):", err.message);
+        }
+      }
+      if (!coords && country) {
+        // last-resort try: country only
+        console.log("🔁 Geocoding fallback: trying country only");
+        try {
+          coords = await geocodeLocation(country);
+        } catch (err) {
+          console.warn("Geocoding error (country only):", err.message);
+        }
+      }
 
-    console.log("📍 Coords result:", coords && { latitude: coords.latitude, longitude: coords.longitude, display_name: coords.display_name });
+      console.log("📍 Coords result:", coords && { latitude: coords.latitude, longitude: coords.longitude, display_name: coords.display_name });
 
-    if (coords && typeof coords.latitude === 'number' && typeof coords.longitude === 'number') {
-      newListing.latitude = coords.latitude;
-      newListing.longitude = coords.longitude;
-    } else {
-      // Geocoding failed silently — map won't show but listing saves successfully
-      console.warn("⚠️ Geocoding returned no coordinates for:", { location, country });
+      if (coords && typeof coords.latitude === 'number' && typeof coords.longitude === 'number' && 
+          !isNaN(coords.latitude) && !isNaN(coords.longitude) &&
+          coords.latitude >= -90 && coords.latitude <= 90 &&
+          coords.longitude >= -180 && coords.longitude <= 180) {
+        newListing.latitude = coords.latitude;
+        newListing.longitude = coords.longitude;
+      } else {
+        // Geocoding failed — warn user but still save listing
+        console.warn("⚠️ Geocoding returned no valid coordinates for:", { location, country });
+        req.flash("warning", `Listing created, but map location could not be determined automatically. Please edit the listing and click on the map to set the location.`);
+      }
     }
 
     await newListing.save();
@@ -187,7 +218,7 @@ module.exports.updateListing = async (req, res, next) => {
         if (m) updateListingBody[m[1]] = req.body[k];
       }
     }
-    const { title, description, price, location, country } = updateListingBody;
+    const { title, description, price, location, country, latitude, longitude } = updateListingBody;
 
     const listing = await Listing.findById(id);
 
@@ -201,6 +232,18 @@ module.exports.updateListing = async (req, res, next) => {
     if (typeof price !== 'undefined') listing.price = price;
     if (typeof location !== 'undefined') listing.location = location;
     if (typeof country !== 'undefined') listing.country = country;
+
+    // Use manual coordinates if provided
+    if (latitude && longitude && 
+        !isNaN(parseFloat(latitude)) && !isNaN(parseFloat(longitude))) {
+      const lat = parseFloat(latitude);
+      const lng = parseFloat(longitude);
+      if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+        listing.latitude = lat;
+        listing.longitude = lng;
+        console.log("📍 Using coordinates from map:", { latitude: lat, longitude: lng });
+      }
+    }
 
     if (req.file) {
       if (
@@ -217,24 +260,52 @@ module.exports.updateListing = async (req, res, next) => {
       };
     }
 
-    console.log("🔍 Re-Geocoding attempt for:", { location, country });
-    let coords = await geocodeLocation(location, country);
-    if (!coords && location) {
-      console.log("🔁 Re-Geocoding fallback: trying location only");
-      coords = await geocodeLocation(location);
-    }
-    if (!coords && country) {
-      console.log("🔁 Re-Geocoding fallback: trying country only");
-      coords = await geocodeLocation(country);
-    }
-    console.log("📍 Re-Geocode result:", coords && { latitude: coords.latitude, longitude: coords.longitude, display_name: coords.display_name });
+    // Attempt geocoding only if manual coordinates weren't provided and location changed
+    const locationChanged = typeof location !== 'undefined' || typeof country !== 'undefined';
+    const hasManualCoords = latitude && longitude && 
+        !isNaN(parseFloat(latitude)) && !isNaN(parseFloat(longitude)) &&
+        parseFloat(latitude) >= -90 && parseFloat(latitude) <= 90 &&
+        parseFloat(longitude) >= -180 && parseFloat(longitude) <= 180;
 
-    if (coords && typeof coords.latitude === 'number' && typeof coords.longitude === 'number') {
-      listing.latitude = coords.latitude;
-      listing.longitude = coords.longitude;
-    } else {
-      // Geocoding failed silently — map won't show but listing updates successfully
-      console.warn("⚠️ Re-Geocoding returned no coordinates for:", { location, country });
+    if (!hasManualCoords && locationChanged) {
+      console.log("🔍 Re-Geocoding attempt for:", { location, country });
+      let coords = null;
+      
+      try {
+        coords = await geocodeLocation(location || listing.location, country || listing.country);
+      } catch (err) {
+        console.warn("Re-Geocoding error (full query):", err.message);
+      }
+      
+      if (!coords && (location || listing.location)) {
+        console.log("🔁 Re-Geocoding fallback: trying location only");
+        try {
+          coords = await geocodeLocation(location || listing.location);
+        } catch (err) {
+          console.warn("Re-Geocoding error (location only):", err.message);
+        }
+      }
+      if (!coords && (country || listing.country)) {
+        console.log("🔁 Re-Geocoding fallback: trying country only");
+        try {
+          coords = await geocodeLocation(country || listing.country);
+        } catch (err) {
+          console.warn("Re-Geocoding error (country only):", err.message);
+        }
+      }
+      console.log("📍 Re-Geocode result:", coords && { latitude: coords.latitude, longitude: coords.longitude, display_name: coords.display_name });
+
+      if (coords && typeof coords.latitude === 'number' && typeof coords.longitude === 'number' &&
+          !isNaN(coords.latitude) && !isNaN(coords.longitude) &&
+          coords.latitude >= -90 && coords.latitude <= 90 &&
+          coords.longitude >= -180 && coords.longitude <= 180) {
+        listing.latitude = coords.latitude;
+        listing.longitude = coords.longitude;
+      } else if (!listing.latitude || !listing.longitude) {
+        // Geocoding failed and no existing coords — warn user but still update listing
+        console.warn("⚠️ Re-Geocoding returned no valid coordinates for:", { location, country });
+        req.flash("warning", `Listing updated, but map location could not be determined automatically. Please click on the map to set the location.`);
+      }
     }
 
     await listing.save();

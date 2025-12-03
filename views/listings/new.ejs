@@ -66,5 +66,97 @@
     >
   </div>
 
+  <div class="mb-3">
+    <div class="card">
+      <div class="card-body">
+        <h6 class="card-title">Select Location on Map</h6>
+        <p class="text-muted small mb-2">Click on the map to set the exact location for your listing.</p>
+        <div id="location-map" style="height: 400px; width: 100%; border-radius: 8px; border: 1px solid #ddd;"></div>
+        <div class="mt-2">
+          <small class="text-muted">
+            Selected: <span id="selected-coords">Click on the map to select location</span>
+          </small>
+        </div>
+        <!-- Hidden fields to store coordinates -->
+        <input type="hidden" name="listing[latitude]" id="latitude-input" />
+        <input type="hidden" name="listing[longitude]" id="longitude-input" />
+      </div>
+    </div>
+  </div>
+
   <button class="btn btn-primary">Create Listing</button>
 </form>
+
+<!-- Leaflet CSS + JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const mapEl = document.getElementById("location-map");
+    const latInput = document.getElementById("latitude-input");
+    const lngInput = document.getElementById("longitude-input");
+    const coordsDisplay = document.getElementById("selected-coords");
+
+    // Initialize map centered on India (default)
+    const map = L.map(mapEl).setView([20.5937, 78.9629], 5);
+
+    // Add tile layer
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    let marker = null;
+
+    // Try to get user's current location
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const userLat = pos.coords.latitude;
+          const userLng = pos.coords.longitude;
+          map.setView([userLat, userLng], 10);
+          setMarker([userLat, userLng]);
+        },
+        (err) => {
+          console.log("Could not get user location:", err);
+        }
+      );
+    }
+
+    // Handle map click
+    map.on("click", function (e) {
+      const lat = e.latlng.lat;
+      const lng = e.latlng.lng;
+      setMarker([lat, lng]);
+    });
+
+    function setMarker(coords) {
+      const [lat, lng] = coords;
+      
+      // Remove existing marker
+      if (marker) {
+        map.removeLayer(marker);
+      }
+
+      // Add new marker
+      marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+      
+      // Update hidden inputs
+      latInput.value = lat;
+      lngInput.value = lng;
+      
+      // Update display
+      coordsDisplay.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+
+      // Allow dragging marker
+      marker.on("dragend", function (e) {
+        const newLat = e.target.getLatLng().lat;
+        const newLng = e.target.getLatLng().lng;
+        latInput.value = newLat;
+        lngInput.value = newLng;
+        coordsDisplay.textContent = `${newLat.toFixed(6)}, ${newLng.toFixed(6)}`;
+      });
+    }
+  });
+</script>
