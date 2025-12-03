@@ -14,6 +14,7 @@
 body {
   background: #f7f7f7 !important;
   font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow-x: hidden; /* prevent horizontal scroll from wide elements */
 }
 
 
@@ -51,6 +52,14 @@ body {
   padding: 30px;
   border-radius: var(--radius);
   box-shadow: var(--shadow-light);
+}
+
+@media (max-width: 768px) {
+  .container .col-md-8 {
+    padding: 16px;
+    box-shadow: none;
+    border-radius: 0;
+  }
 }
 
 
@@ -233,7 +242,9 @@ body {
 
 /* Responsive — full width on smaller screens */
 @media (max-width: 992px) {
-  .nav-search-center { min-width: 320px; }
+  .nav-search-center {
+    min-width: 320px;
+  }
 }
 
 @media (max-width: 576px) {
@@ -246,8 +257,8 @@ body {
   }
 
   .nav-search-center {
-    min-width: 100%;
-    width: calc(100% - 32px);
+    min-width: 0;
+    width: 100%;
     padding: 8px 10px;
   }
 

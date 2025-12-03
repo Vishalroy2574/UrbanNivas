@@ -80,6 +80,33 @@ router.post(
   }
 );
 
+// ========== ADMIN LOGIN ==========
+
+// GET /admin/login -> show admin login form
+router.get("/admin/login", (req, res) => {
+  res.render("users/admin-login", { title: "Admin Login" });
+});
+
+// POST /admin/login -> admin auth only
+router.post("/admin/login", (req, res, next) => {
+  passport.authenticate("local", (err, user, info) => {
+    if (err) return next(err);
+    if (!user) {
+      req.flash("error", (info && info.message) || "Invalid credentials.");
+      return res.redirect("/admin/login");
+    }
+    if (user.role !== "admin") {
+      req.flash("error", "Administrator access only.");
+      return res.redirect("/admin/login");
+    }
+    req.logIn(user, (loginErr) => {
+      if (loginErr) return next(loginErr);
+      req.flash("success", "Welcome, admin!");
+      return res.redirect("/admin/users");
+    });
+  })(req, res, next);
+});
+
 // ========== PROFILE ==========
 
 // GET /profile -> current logged in user's profile

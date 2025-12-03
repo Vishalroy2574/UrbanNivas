@@ -165,7 +165,6 @@ module.exports.renderEditForm = async (req, res, next) => {
       req.flash("error", "Listing not found");
       return res.redirect("/listings");
     }
-    // Public edit enabled — allow anyone to open the edit form
     res.render("listings/edit", { title: "Edit Listing", listing });
   } catch (err) {
     next(err);
@@ -196,9 +195,6 @@ module.exports.updateListing = async (req, res, next) => {
       req.flash("error", "Listing not found");
       return res.redirect("/listings");
     }
-
-    // Public update enabled — allow anyone to submit changes
-
     // Only overwrite fields that were actually provided in the update payload.
     if (typeof title !== 'undefined') listing.title = title;
     if (typeof description !== 'undefined') listing.description = description;
@@ -268,6 +264,32 @@ module.exports.showListing = async (req, res, next) => {
       return res.redirect("/listings");
     }
 
+    // Auto-populate coordinates if missing to keep legacy listings working
+    if (
+      (listing.latitude === undefined ||
+        listing.latitude === null ||
+        listing.longitude === undefined ||
+        listing.longitude === null) &&
+      (listing.location || listing.country)
+    ) {
+      try {
+        let coords = await geocodeLocation(listing.location, listing.country);
+        if (!coords && listing.location) coords = await geocodeLocation(listing.location);
+        if (!coords && listing.country) coords = await geocodeLocation(listing.country);
+        if (
+          coords &&
+          typeof coords.latitude === "number" &&
+          typeof coords.longitude === "number"
+        ) {
+          listing.latitude = coords.latitude;
+          listing.longitude = coords.longitude;
+          await listing.save();
+        }
+      } catch (geoErr) {
+        console.warn("Unable to auto-geocode listing", id, geoErr.message);
+      }
+    }
+
     const totalReviews = listing.reviews.length;
     let avgRating = 0;
     const ratingCounts = [0, 0, 0, 0, 0];
@@ -281,14 +303,20 @@ module.exports.showListing = async (req, res, next) => {
       avgRating = sum / totalReviews;
     }
 
-    // Show edit/delete controls to everyone (public edit enabled)
+    const isOwner =
+      req.user &&
+      listing.owner &&
+      listing.owner.equals &&
+      listing.owner.equals(req.user._id);
+    const isAdmin = req.user && req.user.role === 'admin';
+    const canAdminister = !!(isOwner || isAdmin);
     res.render("listings/show", {
       title: listing.title,
       listing,
       avgRating,
       ratingCounts,
       totalReviews,
-      canEdit: true,
+      canEdit: !!canAdminister,
     });
   } catch (err) {
     next(err);
@@ -342,10 +370,6 @@ module.exports.deleteListing = async (req, res, next) => {
       req.flash("error", "Listing not found");
       return res.redirect("/listings");
     }
-
-    // Authorization: only owner or site owner can delete
-    // Public delete enabled — allow anyone to delete this listing
-
     if (
       listing.image &&
       listing.image.filename &&

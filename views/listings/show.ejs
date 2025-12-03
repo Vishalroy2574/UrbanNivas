@@ -19,10 +19,23 @@
       <img src="<%= imageSrc %>" class="card-img-top" alt="<%= listing.title %>">
 
       <div class="card-body">
-        <% if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'owner')) { %>
+        <% 
+          const isOwnerForBanner = currentUser && listing.owner && (
+            listing.owner.equals
+              ? listing.owner.equals(currentUser._id)
+              : listing.owner.toString() === currentUser._id.toString()
+          );
+          const isAdminForBanner = currentUser && currentUser.role === 'admin';
+        %>
+        <% if (isOwnerForBanner || isAdminForBanner) { %>
           <div class="mb-3">
             <div class="alert alert-info py-2 mb-0">
-              <strong>Note:</strong> You have elevated privileges (<%= currentUser.role %>). You can edit or delete listings and moderate reviews.
+              <strong>Note:</strong>
+              <% if (isAdminForBanner) { %>
+                You are logged in as an administrator. You can edit or delete listings and moderate reviews.
+              <% } else { %>
+                You are the owner of this listing. You can edit or delete it.
+              <% } %>
             </div>
           </div>
           <div class="mb-3">
@@ -151,7 +164,8 @@
                     <div
                       class="progress-bar"
                       role="progressbar"
-                      style="width: <%= percent + '%' %>;"
+                    style="width: <%= percent %>%;"
+
                   ></div>
                 </div>
               </div>

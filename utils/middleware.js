@@ -23,8 +23,10 @@ module.exports.isListingOwnerOrSiteOwner = async (req, res, next) => {
     const userId = req.user ? req.user._id : null;
     const userRole = req.user ? (req.user.role || 'user') : 'user';
 
-    const isOwner = userId && listing.owner && listing.owner.equals(userId);
-    const isPrivileged = userRole === 'owner' || userRole === 'admin';
+    const isOwner =
+      userId && listing.owner && listing.owner.equals(userId);
+    const isPrivileged =
+      userRole === 'owner' || userRole === 'admin';
 
     if (!isOwner && !isPrivileged) {
       req.flash('error', 'You do not have permission to perform that action.');

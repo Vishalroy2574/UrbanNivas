@@ -4,7 +4,11 @@ const router = express.Router();
 
 const multer = require("multer");
 const listings = require("../controllers/listings");
-const { isLoggedIn, isListingOwnerOrSiteOwner } = require("../utils/middleware");
+const {
+  isLoggedIn,
+  isAdmin,
+  isListingOwnerOrSiteOwner,
+} = require("../utils/middleware");
 
 // Cloudinary + Multer setup
 const cloudinary = require("cloudinary").v2;
@@ -45,14 +49,30 @@ router.post(
   listings.createListing
 );
 
-// edit form – public (anyone can open)
-router.get("/:id/edit", listings.renderEditForm);
+// edit form – must be logged in and owner/admin
+router.get(
+  "/:id/edit",
+  isLoggedIn,
+  isListingOwnerOrSiteOwner,
+  listings.renderEditForm
+);
 
-// update listing – public (anyone can update)
-router.put("/:id", upload.single("image"), listings.updateListing);
+// update listing – must be logged in and owner/admin
+router.put(
+  "/:id",
+  isLoggedIn,
+  isListingOwnerOrSiteOwner,
+  upload.single("image"),
+  listings.updateListing
+);
 
-// delete listing – public (anyone can delete)
-router.delete("/:id", listings.deleteListing);
+// delete listing – must be logged in and owner/admin
+router.delete(
+  "/:id",
+  isLoggedIn,
+  isListingOwnerOrSiteOwner,
+  listings.deleteListing
+);
 
 // delete review
 router.delete(
