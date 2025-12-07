@@ -1,280 +1,247 @@
-UrbanNivas– Rental Listing Platform 
+# 🌍 UrbanNivas - Rental Listing Platform
 
-🚀 A feature-rich full-stack web application inspired by Airbnb, developed using MongoDB, Express.js, and Node.js — providing seamless listing, reviewing, and user authentication functionalities.
+What started as a learning project turned into a fully functional Airbnb-like platform. Built with Node.js, Express, MongoDB, and a bunch of other cool libraries, UrbanNivas lets you browse rental properties, list your own place, make bookings, and read what other people think about listings.
 
-🌐 Project Overview
+**🔗 Check it out live:** [urbannivas-8.onrender.com](https://urbannivas-8.onrender.com/)
 
-WanderLust enables users to explore and create property listings, add reviews, and manage their accounts through secure authentication. It integrates modern tools for media uploads, location mapping, and session management — delivering a smooth user experience throughout the platform.
+---
 
-🔗 Live Demo: (Project URL)
-🔗 GitHub Repo: (Your Repo URL)
+## 📌 What's This Project About?
 
-🛠️ Tech Stack & Dependencies
-Backend & Core
+I built UrbanNivas to get hands-on experience with full-stack development. It's basically a rental platform where you can:
+- Browse through all available listings
+- Create and manage your own property listings
+- Upload nice photos of your properties (stored on Cloudinary)
+- Leave reviews for places you've visited
+- Book properties and keep track of your bookings
+- Different user roles - you can be a regular user, property owner, or admin
 
-Node.js
+It was a fun challenge combining everything I learned - authentication, databases, file uploads, real-time features, and actually making it look decent on the frontend.
 
-Express.js
+---
 
-MongoDB
+## 🛠️ What I Used
 
-Mongoose (MongoDB Object Modeling)
+**Backend stuff:**
+- Node.js with Express for the server
+- MongoDB for the database (Mongoose to keep things organized)
 
-Authentication & Security
+**Getting Users Logged In:**
+- Passport for authentication (the local strategy)
+- Password hashing so passwords are actually secure
+- Session management to keep users logged in
 
-Passport.js
+**Handling Images & Content:**
+- EJS for rendering templates on the server
+- Cloudinary for storing images (way better than storing files locally)
+- Multer to handle file uploads
 
-Passport Local
+**Other libraries that made life easier:**
+- Connect-Flash for those success/error messages
+- Axios for making HTTP requests
+- Leaflet for showing property locations on maps
+- Method-Override to do PUT/DELETE requests from forms
 
-Passport Local Mongoose
+---
 
-Express-Session
+## 🌟 What Can You Do?
 
-Connect-Mongo (Session Storage)
+**User Signup & Login** - Pretty standard stuff. You create an account with a username and password. Passwords are hashed so I can't see them even if I wanted to. You stay logged in through sessions.
 
-BCrypt / built-in Password Hashing
+**Create Your Own Listings** - If you own a property or want to rent out a place, you can add it with a description, price, location, and upload photos. Edit or delete whenever you want.
 
-Cookie-Parser
+**Review System** - After booking or visiting a place, leave a review. See what others thought about listings too. It helps people make decisions.
 
+**Make Bookings** - Browse listings and book properties you're interested in. Keep track of all your bookings in one place.
 
-Dotenv (Environment Variables)
+**User Profiles** - Update your info, change your password, upload a profile picture.
 
-Media & UI
+**Admin Dashboard** - If you're an admin, you can manage all users and change their roles (regular user, owner, admin).
 
-EJS (Templating Engine)
+**Map Integration** - See property locations on an interactive map using Leaflet. Helps you get a sense of where the place actually is.
 
-Cloudinary (Image Storage)
+---
 
-Multer (File Uploads)
+## 📁 Folder Structure
 
-Mapping & Utilities
+```
+UrbanNivas/
+├── app.js                 # Main server file
+├── package.json          # Dependencies list
+├── models/               # Database schemas
+│   ├── user.js
+│   ├── listing.js
+│   ├── review.js
+│   └── booking.js
+├── routes/               # API endpoints
+│   ├── user.js           # Auth routes
+│   ├── listing.js        # Listing routes
+│   ├── review.js         # Review routes
+│   ├── bookings.js       # Booking routes
+│   └── admin.js          # Admin routes
+├── controllers/          # Business logic for each route
+│   ├── listings.js
+│   ├── reviews.js
+│   └── bookings.js
+├── views/                # EJS templates
+│   ├── layouts/
+│   ├── listings/
+│   ├── users/
+│   ├── bookings/
+│   ├── admin/
+│   └── includes/
+├── utils/                # Helper functions
+│   ├── middleware.js     # Custom middleware
+│   └── geocode.js
+├── public/               # CSS, images, uploads
+│   ├── css/
+│   └── uploads/
+└── init/                 # Database setup scripts
+```
 
-Leaflet
+---
 
-Connect-Flash (Flash Messages)
+## 🚀 How to Get It Running
 
-🌟 Key Features
+**What You Need:**
+- Node.js installed
+- MongoDB (either local or Atlas cloud)
+- A Cloudinary account (it's free and easy to set up)
 
-✔ User Authentication
+**Steps:**
 
-Signup, Login & Logout
-
-Secure Password Hashing
-
-Individual User Profile Page
-
-✔ Listings Management
-
-Create new property listings
-
-Edit or Delete your listings
-
-Upload images to Cloudinary
-
-✔ Review System
-
-Add and delete reviews on listings
-
-✔ Account Management
-
-Update Profile & Change Password
-
-✔ Interactive Maps
-
-Leaflet integration to visualize listing location
-
-✔ Enhanced Security & UX
-
-
-Flash messaging system for better communication
-
-🚧 Challenges & Solutions
-Challenge	Solution
-Handling user data securely	Adopted secure hashing & session-based authentication
-Managing media uploads & storage	Integrated Cloudinary + Multer for optimized delivery
-Implementing scalable backend architecture	Designed a REST-structured server ensuring smooth scalability
-📸 Screenshots
-
-📍 Add screenshots of the UI here once ready
-
-🚀 How to Run Locally
-# Clone the repository
-git clone <your-repo-link>
-
-# Navigate into the project
+1. Clone the repo
+```bash
+git clone https://github.com/Vishalroy2574/UrbanNivas.git
 cd UrbanNivas
+```
 
-# Install dependencies
+2. Install everything
+```bash
 npm install
+```
 
+3. Create a `.env` file in the root folder with:
+```env
+ATLASDB_URL=mongodb+srv://username:password@cluster.mongodb.net/UrbanNivas
+SESSION_SECRET=pick_something_random_here
+CLOUD_NAME=your_cloudinary_name
+CLOUD_API_KEY=your_key
+CLOUD_API_SECRET=your_secret
+PORT=8080
+NODE_ENV=development
+```
 
-# Add your .env file with:
-# CLOUDINARY credentials
-# SESSION_SECRET
-# MONGO_URL
+4. Start it up
+```bash
+npm run dev
+```
 
-# Start server
-npm start
+5. Open your browser and go to `http://localhost:8080`
 
+---
 
-Server runs at:
-urbannivas-8.onrender.com/
+## 📖 API Routes (If You Want to Extend It)
 
-🎯 Future Enhancements
+**User stuff:**
+- `GET /signup` - signup page
+- `POST /signup` - create account
+- `GET /login` - login page
+- `POST /login` - log in
+- `GET /logout` - log out
 
-Wishlist / Favorites Feature
+**Listings:**
+- `GET /listings` - see all listings
+- `GET /listings/new` - form to create a listing
+- `POST /listings` - actually create it
+- `GET /listings/:id` - see details
+- `GET /listings/:id/edit` - edit form
+- `PUT /listings/:id` - save changes
+- `DELETE /listings/:id` - delete it
 
-Booking & Payment Integration
+**Reviews:**
+- `POST /listings/:id/reviews` - add a review
+- `DELETE /listings/:id/reviews/:reviewId` - delete review
 
-Advanced Search & Filters
+**Bookings:**
+- `POST /listings/:id/book` - make a booking
+- `GET /bookings/mine` - see your bookings
 
-User-to-User Messaging
+**Admin:**
+- `GET /admin/users` - manage users
+- `POST /admin/users/:id/role` - change user role
 
-🤝 Acknowledgements
+---
 
-Special thanks to Shradha Khapra and Aman Dhattarwal of Apna College for their guidance, mentorship, and motivational support throughout this project. 🙌
+## 🚧 Stuff I Figured Out While Building This
 
-🙌 Feedback & Support
+**Keeping user data secure** - Had to implement proper password hashing and not store passwords in plain text. Passport.js handles a lot of this automatically which is nice.
 
-If you have any suggestions or questions, feel free to share your thoughts. Looking forward to improvements and collaboration with the tech community!
+**File uploads to the cloud** - Storing images locally is a pain, so I integrated Cloudinary. Combined with Multer, it works pretty smoothly now.
 
-🏷️ Tags
+**Session persistence** - Sessions can be tricky, especially when the server restarts. Had to make sure MongoDB stores sessions properly.
 
-#FullStackDevelopment #WebDevelopment #WanderLust #Coding #TechCommunity #ApnaCollege
+**Scalable backend** - Separated routes, controllers, and models so the code doesn't get messy as it grows.
 
-If you want, I can also:
-✨ Add screenshots section placeholders professionally
-📌 Add badges (stars, forks, tech stack icons)
-🧩 Provide a folder structure section
-🛡️ Add detailed API documentation
-🎨 Improve formatting with emojis & visuals
+**Showing map locations** - Leaflet was perfect for this. Way lighter than Google Maps and gets the job done.
 
+**Different user permissions** - Built middleware to check if a user is logged in, is an admin, or owns a listing before letting them do certain things.
 
-🌍 UrbanNivas
+---
 
-UrbanNivas is a full-stack web application inspired by Airbnb where users can browse listings, create their own stays, and leave reviews. It is built using the MongoDB, Express.js, Node.js (MEN stack) with secure authentication, media uploads, and interactive maps.
+## 📸 Screenshots
 
-📌 About the Project
+Coming soon! I should probably take some nice screenshots showing the homepage, listing page, booking system, etc.
 
-The goal of this project is to practice and implement real-world features found in booking platforms. From user management to image handling and location visualization, every part of this app helped me grow my full-stack development skills.
+---
 
-This project includes:
+## 🎯 What's Next?
 
-User login, logout, and profile handling
+I'm thinking about adding:
+- Wishlist feature (save listings you like)
+- Payment integration (Stripe or Razorpay)
+- Better search and filters
+- Messaging between users
+- Email notifications
+- A calendar for bookings
 
-Full CRUD operations for listings
+Some of these are pretty ambitious, but they'd be cool to work on.
 
-Review system with proper validation
+---
 
-Secure password hashing and session storage
+## 🤝 Want to Help?
 
-Cloud image uploads and Mapbox maps integration
+If you find a bug or have ideas, feel free to fork it and submit a pull request. Here's how:
 
-🛠️ Tech Stack & Libraries
+1. Fork the repo
+2. Create a branch for your feature (`git checkout -b feature/cool-thing`)
+3. Make your changes and commit (`git commit -m 'Added cool thing'`)
+4. Push it up (`git push origin feature/cool-thing`)
+5. Open a pull request
 
-Core
+---
 
-Node.js
+## 📝 License
 
-Express.js
+ISC License - basically do what you want with it.
 
-MongoDB
+---
 
-Mongoose
+## 🙏 Shoutouts
 
-Authentication & Security
+Big thanks to:
+- Shradha Khapra and Aman Dhattarwal for the guidance and making me believe I could actually build something decent
+- Apna College for the resources and community
+- Everyone in the tech community sharing their knowledge for free
 
-Passport.js
+---
 
-Passport-Local / Passport-Local-Mongoose
+## 💬 Got Questions?
 
-Express-Session
+Hit me up on GitHub or drop me an email. Always happy to chat about code or answer questions.
 
-Connect-Mongo
+---
 
-Cookie-Parser
+**(https://github.com/Vishalroy2574)**
 
-Dotenv
-
-Media, UI & Utilities
-
-EJS (templating)
-
-Cloudinary (image storage)
-
-Multer (file upload)
-
-Connect-Flash (flash messages)
-
-Leaflet
-
-🌟 Features
-
-🔑 User Authentication with hashed passwords
-
-🏡 Add, edit, and delete listings
-
-🖼️ Upload listing images to Cloudinary
-
-⭐ Add and delete reviews
-
-👤 Update profile info and password
-
-🗺️ Leaflet for viewing listing locations
-
-✨ Flash message support for a better user experience
-
-🔧 Setup Instructions
-
-Clone the project:
-
-git clone <your-repo-url>
-cd UrbanNivas
-
-
-Install required packages:
-
-npm install
-
-
-Create a .env file with the following keys:
-
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_KEY=
-CLOUDINARY_SECRET=
-MAPBOX_TOKEN=
-MONGO_URL=
-SESSION_SECRET=
-
-
-Start the server:
-
-npm start
-
-
-Now open your browser and navigate to:
-👉 urbannivas-8.onrender.com/
-
-📸 Screenshots
-
-<img width="1868" height="862" alt="Screenshot (25)" src="https://github.com/user-attachments/assets/01eeda81-e93e-4f84-8af9-685c1e9255fd" />
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/0737073a-e2ec-4192-9107-b78c29d3ff41" />
-<img width="1790" height="879" alt="Screenshot (27)" src="https://github.com/user-attachments/assets/b8c8f11f-946b-4495-ba86-a01b8ae7c585" />
-<img width="1892" height="873" alt="Screenshot (28)" src="https://github.com/user-attachments/assets/fd244169-e6dd-4278-8255-9416e9800096" />
-
-
-
-
-🚧 Challenges
-
-During development, I faced challenges with authentication flow, data handling, and routing, especially while combining features like image uploads and sessions. Slowly, after debugging and restructuring the backend logic, everything came together smoothly.
-
-📝 Future Enhancements
-
-Search and filtering options
-
-Wishlists / Favorites
-
-Booking system + Payments
-
-User messaging feature
+#FullStackDeveloper #WebDevelopment #UrbanNivas #NodeJS #MongoDB #Express
