@@ -191,7 +191,11 @@ npm run dev
 
 ## 📸 Screenshots
 
-Coming soon! I should probably take some nice screenshots showing the homepage, listing page, booking system, etc.
+<img width="1896" height="877" alt="Screenshot (26)" src="https://github.com/user-attachments/assets/50f55c1b-cdf7-494a-b765-fa4318819a7b" />
+<img width="1868" height="862" alt="Screenshot (25)" src="https://github.com/user-attachments/assets/5f1c7fc8-e823-4d6c-9090-0bf35abf5caa" />
+<img width="1790" height="879" alt="Screenshot (27)" src="https://github.com/user-attachments/assets/ea2ddc42-3fd1-4f79-81d1-5f31fdd5f886" />
+<img width="1892" height="873" alt="Screenshot (28)" src="https://github.com/user-attachments/assets/ee9f92ed-20f5-4025-ac6d-8ec07438b8bf" />
+
 
 ---
 
